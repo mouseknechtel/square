@@ -266,7 +266,7 @@ int main () {
          //   matrix[12] =matrix[12] -0.01;
             
             
-        //    glm::mat4 test = glm::rotate(glm::mat4(1.0f), 3.14f, glm::vec3(1.0));
+           glm::mat4 test = glm::rotate(glm::mat4(1.0f), 3.14f,  glm::vec3(-1.0f, 0.0f, 0.0f));
             
 //            glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.f);
 //
@@ -280,10 +280,9 @@ int main () {
 //            View = glm::rotate(View, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
 //            glm::mat4 Model = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
 //
-
-            
-           
-            glUniformMatrix4fv(glGetUniformLocation(shader_programme, "matrix"), 1, GL_FALSE, glm::value_ptr(matrix));
+         
+            matrix=matrix*test;
+              glUniformMatrix4fv(glGetUniformLocation(shader_programme, "matrix"), 1, GL_FALSE, glm::value_ptr(matrix));
           
         }
         
