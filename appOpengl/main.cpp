@@ -10,6 +10,38 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <math.h>
+#include <iostream>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include <glm/vec3.hpp> // glm::vec3
+#include <glm/vec4.hpp> // glm::vec4
+#include <glm/mat4x4.hpp> // glm::mat4
+#include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
+
+// glm::translate, glm::rotate, glm::scale, glm::perspective
+float speed = 1.0f; // move at 1 unit per second
+float last_position = 0.0f;
+
+
+
+
+
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+        double xpos, ypos;
+        //getting cursor position
+        glfwGetCursorPos(window, &xpos, &ypos);
+        std::cout << "Cursor Position at (" << xpos << " : " << ypos << std::endl;
+    }
+}
+
 /* copy a shader from a plain text file into a character array */
 bool parse_file_into_str (
                            char* file_name, char* shader_str, int max_len
@@ -38,14 +70,16 @@ bool parse_file_into_str (
     return true;
 }
 int main () {
+
     
-    GLfloat matrix[] = {
-        1.0f, 0.0f, 0.0f, 0.0f, // first column
-        0.0f, 1.0f, 0.0f, 0.0f, // second column
-        0.0f, 0.0f, 1.0f, 0.0f, // third column
-        0.20f, 0.20f, 0.0f, 1.0f // fourth column
-    };
-    
+    glm::mat4 matrix(1.0);
+//    GLfloat matrix[] = {
+//        1.0f, 0.0f, 0.0f, 0.0f, // first column
+//        0.0f, 1.0f, 0.0f, 0.0f, // second column
+//        0.0f, 0.0f, 1.0f, 0.0f, // third column
+//        0.20f, 0.20f, 0.0f, 1.0f // fourth column
+//    };
+//
     
     const GLchar* p;
     
@@ -180,21 +214,30 @@ int main () {
     glAttachShader (shader_programme, vs);
     glLinkProgram (shader_programme);
     
-
-    /* this loop clears the drawing surface, then draws the geometry described by
-     the VAO onto the drawing surface. we 'poll events' to see if the window was
-     closed, etc. finally, we 'swap the buffers' which displays our drawing surface
-     onto the view area. we use a double-buffering system which means that we have
-     a 'currently displayed' surface, and 'currently being drawn' surface. hence
-     the 'swap' idea. in a single-buffering system we would see stuff being drawn
-     one-after-the-other */
+    glfwSetMouseButtonCallback(window, mouse_button_callback);
+    
+    
+    
     while (!glfwWindowShouldClose (window)) {
         /* wipe the drawing surface clear */
+        
+        
+        
+        
+        static double previous_seconds = glfwGetTime ();
+        double current_seconds = glfwGetTime ();
+        double elapsed_seconds = current_seconds - previous_seconds;
         glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            
+        
         int matrix_location = glGetUniformLocation (shader_programme, "matrix");
         glUseProgram (shader_programme);
-        glUniformMatrix4fv (matrix_location, 1, GL_FALSE, matrix);
+        glUniformMatrix4fv(glGetUniformLocation(shader_programme, "matrix"), 1, GL_FALSE, glm::value_ptr(matrix));
+        glUseProgram (shader_programme);
+        
+        
+        
+        
+        
         
         glBindVertexArray (vao);
         /* draw points 0-3 from the currently bound VAO with current in-use shader*/
@@ -202,6 +245,50 @@ int main () {
         /* update other events like input handling */
         glfwPollEvents ();
         /* put the stuff we've been drawing onto the display */
+        if (GLFW_PRESS == glfwGetKey (window, GLFW_KEY_ESCAPE)) {
+            glfwSetWindowShouldClose (window, 1);
+        }
+        
+        if (GLFW_PRESS == glfwGetKey (window, GLFW_KEY_D)) {
+            
+            
+       //     matrix[12] =matrix[12] +0.01;
+            
+            
+              glUniformMatrix4fv(glGetUniformLocation(shader_programme, "matrix"), 1, GL_FALSE, glm::value_ptr(matrix));
+            //
+            // Note: this call is related to the most recently 'used' shader programme
+        }
+        
+        if (GLFW_PRESS == glfwGetKey (window, GLFW_KEY_A)) {
+            
+            
+         //   matrix[12] =matrix[12] -0.01;
+            
+            
+        //    glm::mat4 test = glm::rotate(glm::mat4(1.0f), 3.14f, glm::vec3(1.0));
+            
+//            glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.f);
+//
+//            glm::mat4 View = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0));
+//            //glm::mat4 test = glm::rotate(matrix, glm::radians(0.20), glm::vec3(1, 1, 1));
+//           // matrix = matrix* test;
+//            //glm::mat4 matrix=  glm::glOrtho(0.0f,800.0f,600.0f,0.0f,-1.0f,1.0);
+//            //
+//            // Note: this call is related to the most recently 'used' shader programme
+//            View = glm::rotate(View,1.0f, glm::vec3(-1.0f, 0.0f, 0.0f));
+//            View = glm::rotate(View, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
+//            glm::mat4 Model = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
+//
+
+            
+           
+            glUniformMatrix4fv(glGetUniformLocation(shader_programme, "matrix"), 1, GL_FALSE, glm::value_ptr(matrix));
+          
+        }
+        
+        
+        //  glUniformMatrix4fv (matrix_location, 1, GL_FALSE, matrix);
         glfwSwapBuffers (window);
     }
     
