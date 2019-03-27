@@ -15,20 +15,85 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
 #include <glm/vec3.hpp> // glm::vec3
 #include <glm/vec4.hpp> // glm::vec4
 #include <glm/mat4x4.hpp> // glm::mat4
-#include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
 
 // glm::translate, glm::rotate, glm::scale, glm::perspective
 float speed = 1.0f; // move at 1 unit per second
 float last_position = 0.0f;
+GLuint shader_programme;
 
 
 
+glm::mat4 model = glm::mat4(1.0f);
+glm::mat4 matrix(1.0);
+glm::mat4 myScalingMatrix(1.0);
+double value = 0.9008;
+float t1     = 0;
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_P && action == GLFW_PRESS)
+    {
+        model = glm::translate(model,glm::vec3(0,0,0)); //position = 0,0,0
+        
+        
+        model = glm::rotate(model,glm::radians(t1)/180,glm::vec3(0,0,1));//rotation z = 0.0
+        
+        myScalingMatrix= glm::scale(myScalingMatrix,glm::vec3(value,value,value));
+        matrix=myScalingMatrix*matrix*model;
+        
+   
+    }
+    if (key == GLFW_KEY_R && action == GLFW_PRESS)
+    {t1=t1+0.5;
+      //  model = glm::translate(model,glm::vec3(0,0,0)); //position = 0,0,0
+        
+        
+        model = glm::rotate(model,glm::radians(t1)/180,glm::vec3(0,0,1));//rotation z = 0.0
+        
+      //  myScalingMatrix= glm::scale(myScalingMatrix,glm::vec3(1/value,1/value,1/value));
+        matrix=matrix*model;
+//        matrix=myScalingMatrix*matrix*model;
+        
+    }
+    
+    if (key == GLFW_KEY_L && action == GLFW_PRESS)
+    {
+        model = glm::translate(model,glm::vec3(0,0,0)); //position = 0,0,0
+        
+        
+        model = glm::rotate(model,glm::radians(t1)/180,glm::vec3(0,0,1));//rotation z = 0.0
+        
+        myScalingMatrix= glm::scale(myScalingMatrix,glm::vec3(1/value,1/value,1/value));
+        matrix=myScalingMatrix*matrix*model;
+        
+        
+    }
+    if (key == GLFW_KEY_E && action == GLFW_PRESS)
+    {
+        //https://open.gl/content/code/c4_transformation.txt
+       // model = glm::translate(model,glm::vec3(0.20,0,0)); //position = 0,0,0
+        printf("%d,  %d, %d \n",matrix[0].x,matrix[0].y,matrix[0].z);
+        matrix = glm::translate(matrix,glm::vec3(0.2,0,0)); //position = 0,0,0
+        printf("%d,  %d, %d \n",matrix[0].x,matrix[0].y,matrix[0].z);
+      //  matrix=matrix*model;
+        
+        
+    }
+    if (key == GLFW_KEY_X && action == GLFW_PRESS)
+    {
+        //https://open.gl/content/code/c4_transformation.txt
+        // model = glm::translate(model,glm::vec3(0.20,0,0)); //position = 0,0,0
+        printf("%d,  %d, %d \n",matrix[0].x,matrix[0].y,matrix[0].z);
+        matrix = glm::translate(matrix,glm::vec3(0.0,-0.2,0)); //position = 0,0,0
+        printf("%d,  %d, %d \n",matrix[0].x,matrix[0].y,matrix[0].z);
+        //  matrix=matrix*model;
+        
+        
+    }
+}
 
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
@@ -70,9 +135,10 @@ bool parse_file_into_str (
     return true;
 }
 int main () {
-
     
-    glm::mat4 matrix(1.0);
+    auto t_start = std::chrono::high_resolution_clock::now();
+t1 = t1+0.01;
+    
 //    GLfloat matrix[] = {
 //        1.0f, 0.0f, 0.0f, 0.0f, // first column
 //        0.0f, 1.0f, 0.0f, 0.0f, // second column
@@ -94,11 +160,20 @@ int main () {
      */
     /* OTHER STUFF GOES HERE NEXT */
     GLfloat points[] = {
-        0.0f,    0.5f,    0.0f,
-        0.5f, -0.5f,    0.0f,
-        -0.5f, -0.5f,    0.0f
+        
+        -0.5f,  0.5f, 1.0f, 0.0f,  // Top-left
+        0.5f,  0.5f, 0.0f, 0.0f, // Top-right
+        0.5f, -0.5f, 0.0f, 0.0f, // Bottom-right
+        -0.5f, 0.5f, 0.0f, 1.0f // Bottom-left
     };
     
+//    GLfloat points[] = {
+//        0.0f,    0.5f,    0.0f,
+//        0.5f, -0.5f,    0.0f,
+//        -0.5f, -0.5f,    0.0f
+//    };
+//
+   
     int params = -1;
     /* these are the strings of code for the shaders
      the vertex shader positions each vertex point */
@@ -108,7 +183,6 @@ int main () {
     /* GL shader objects for vertex and fragment shader [components] */
     GLuint vs, fs;
     /* GL shader programme object [combined, to link] */
-    GLuint shader_programme;
     
     
 
@@ -128,8 +202,12 @@ int main () {
     glfwWindowHint (GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     
     window = glfwCreateWindow (
-                               640, 480, "Hello Triangle", NULL, NULL
+                               600, 600, "Hello Triangle", NULL, NULL
                                );
+    
+  //      glViewport( 0, 0, 800, 600 );
+    
+      glfwSetKeyCallback(window, key_callback);
     if (!window) {
         fprintf (stderr, "ERROR: could not open window with GLFW3\n");
         glfwTerminate();
@@ -154,8 +232,10 @@ int main () {
      on the graphics adapter's memory. in our case - the vertex points */
     glGenBuffers (1, &vbo);
     glBindBuffer (GL_ARRAY_BUFFER, vbo);
-    glBufferData (GL_ARRAY_BUFFER, 9 * sizeof (GLfloat), points, GL_STATIC_DRAW);
     
+    //antesglBufferData (GL_ARRAY_BUFFER, 12 * sizeof (GLfloat), points, GL_STATIC_DRAW);
+    
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
     /* the vertex array object (VAO) is a little descriptor that defines which
      data from vertex buffer objects should be used as input variables to vertex
      shaders. in our case - use our only VBO, and say 'every three floats is a
@@ -179,11 +259,6 @@ int main () {
         assert (parse_file_into_str ("/Users/maiquelknechtel/Desktop/code/appOpengl/appOpengl/vs.glsl", vertex_shader, 1024 * 256));
     
     assert(parse_file_into_str("/Users/maiquelknechtel/Desktop/code/appOpengl/appOpengl/fs.glsl",fragment_shader, 1024* 256));
-    
-    //vertex
-    
-   
-    
     
 
     
@@ -212,6 +287,8 @@ int main () {
     shader_programme = glCreateProgram ();
     glAttachShader (shader_programme, fs);
     glAttachShader (shader_programme, vs);
+    
+    glBindFragDataLocation(shader_programme, 0, "outColor");
     glLinkProgram (shader_programme);
     
     glfwSetMouseButtonCallback(window, mouse_button_callback);
@@ -229,8 +306,8 @@ int main () {
         double elapsed_seconds = current_seconds - previous_seconds;
         glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-        int matrix_location = glGetUniformLocation (shader_programme, "matrix");
-        glUseProgram (shader_programme);
+      //  int matrix_location = glGetUniformLocation (shader_programme, "matrix");
+        //glUseProgram (shader_programme);
         glUniformMatrix4fv(glGetUniformLocation(shader_programme, "matrix"), 1, GL_FALSE, glm::value_ptr(matrix));
         glUseProgram (shader_programme);
         
@@ -241,7 +318,12 @@ int main () {
         
         glBindVertexArray (vao);
         /* draw points 0-3 from the currently bound VAO with current in-use shader*/
-        glDrawArrays (GL_TRIANGLES, 0, 3);
+        //antes
+        glDrawArrays (GL_TRIANGLES, 0, 6);
+        
+        // Draw a rectangle from the 2 triangles using 6 indices
+        
+            //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         /* update other events like input handling */
         glfwPollEvents ();
         /* put the stuff we've been drawing onto the display */
@@ -249,43 +331,31 @@ int main () {
             glfwSetWindowShouldClose (window, 1);
         }
         
-        if (GLFW_PRESS == glfwGetKey (window, GLFW_KEY_D)) {
-            
-            
-       //     matrix[12] =matrix[12] +0.01;
-            
-            
-              glUniformMatrix4fv(glGetUniformLocation(shader_programme, "matrix"), 1, GL_FALSE, glm::value_ptr(matrix));
-            //
-            // Note: this call is related to the most recently 'used' shader programme
-        }
+      //  glm::mat4 model = glm::mat4(1.0f);
         
-        if (GLFW_PRESS == glfwGetKey (window, GLFW_KEY_A)) {
-            
-            
-         //   matrix[12] =matrix[12] -0.01;
-            
-            
-           glm::mat4 test = glm::rotate(glm::mat4(1.0f), 3.14f,  glm::vec3(-1.0f, 0.0f, 0.0f));
-            
-//            glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.f);
-//
-//            glm::mat4 View = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.0));
-//            //glm::mat4 test = glm::rotate(matrix, glm::radians(0.20), glm::vec3(1, 1, 1));
-//           // matrix = matrix* test;
-//            //glm::mat4 matrix=  glm::glOrtho(0.0f,800.0f,600.0f,0.0f,-1.0f,1.0);
-//            //
-//            // Note: this call is related to the most recently 'used' shader programme
-//            View = glm::rotate(View,1.0f, glm::vec3(-1.0f, 0.0f, 0.0f));
-//            View = glm::rotate(View, 1.0f, glm::vec3(0.0f, 1.0f, 0.0f));
-//            glm::mat4 Model = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
-//
-         
-            matrix=matrix*test;
-              glUniformMatrix4fv(glGetUniformLocation(shader_programme, "matrix"), 1, GL_FALSE, glm::value_ptr(matrix));
-          
-        }
+     
         
+        t1=t1+0.001;
+       
+     
+      
+       //model = glm::translate(model,glm::vec3(1,1,1)); //position = 0,0,0
+        
+       //aqui descomentar
+
+        model = glm::rotate(model,glm::radians(t1)/180,glm::vec3(0,0,0.2));//rotation z = 0.0
+        
+        
+        
+       glUniformMatrix4fv(glGetUniformLocation(shader_programme, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        
+        
+        glUniformMatrix4fv(glGetUniformLocation(shader_programme, "matrix"), 1, GL_FALSE, glm::value_ptr(matrix));
+        glUseProgram (shader_programme);
+      
+        
+        
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         
         //  glUniformMatrix4fv (matrix_location, 1, GL_FALSE, matrix);
         glfwSwapBuffers (window);
