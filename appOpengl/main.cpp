@@ -159,13 +159,32 @@ t1 = t1+0.01;
     /* geometry to use. these are 3 xyz points (9 floats total) to make a triangle
      */
     /* OTHER STUFF GOES HERE NEXT */
+//    GLfloat points[] = {
+//
+//        -0.5f,  0.5f, 0.0f, 0.0f,  // e1 e1Top-left
+//        0.5f,  0.5f, 0.0f, 0.0f, //  e2Top-right
+//        0.5f, -0.5f, 0.0f, 0.0f, //  t2 Bottom-right
+//        -0.5f, 0.5f, 0.0f, 0.0f // t1
+//    };
+//
     GLfloat points[] = {
-        
-        -0.5f,  0.5f, 1.0f, 0.0f,  // Top-left
-        0.5f,  0.5f, 0.0f, 0.0f, // Top-right
-        0.5f, -0.5f, 0.0f, 0.0f, // Bottom-right
-        -0.5f, 0.5f, 0.0f, 1.0f // Bottom-left
+        -0.5,   0.5, 0.0f,
+        -0.5,  -0.5, 0.0f,
+         0.5,  -0.5, 0.0f,
+        -0.5,   0.5, 0.0f,
+         0.5,  -0.5, 0.0f,
+         0.5,   0.5, 0.0f,
     };
+//
+
+    
+//    GLfloat points[] = {
+//
+//        -0.5f,  0.5f, 0.0f, 0.0f,  // Top-left
+//        0.5f,  0.5f, 0.0f, 0.0f, // Top-right
+//        0.5f, -0.5f, 0.0f, 0.0f, // Bottom-right
+//        -0.5f, 0.5f, 0.0f, 0.0f // Bottom-left
+//    };
     
 //    GLfloat points[] = {
 //        0.0f,    0.5f,    0.0f,
@@ -331,21 +350,17 @@ t1 = t1+0.01;
             glfwSetWindowShouldClose (window, 1);
         }
         
-      //  glm::mat4 model = glm::mat4(1.0f);
-        
      
         
         t1=t1+0.001;
        
      
       
-       //model = glm::translate(model,glm::vec3(1,1,1)); //position = 0,0,0
+        model =  translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+       
+        model = glm::rotate(model,glm::radians(t1)/180,glm::vec3(0.0,0,1));//rotation z = 0.0
         
-       //aqui descomentar
-
-        model = glm::rotate(model,glm::radians(t1)/180,glm::vec3(0,0,0.2));//rotation z = 0.0
-        
-        
+        model = translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         
        glUniformMatrix4fv(glGetUniformLocation(shader_programme, "model"), 1, GL_FALSE, glm::value_ptr(model));
         
