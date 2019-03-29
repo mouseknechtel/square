@@ -5,6 +5,8 @@
 //  Created by Maiquel Knechtel on 25/02/19.
 //  Copyright © 2019 Maiquel Knechtel. All rights reserved.
 //
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #include <GL/glew.h>
 #include <GLFW/glfw3.h> /* GLFW helper library */
 #include <stdio.h>
@@ -31,6 +33,43 @@ glm::mat4 matrix(1.0);
 glm::mat4 myScalingMatrix(1.0);
 double value = 0.9008;
 float t1     = 0;
+
+
+bool load_texture( const char *file_name, GLuint *tex ) {
+    int x, y, n;
+    int force_channels = 4;
+    // the following function call flips the image
+    // needs to be called before each stbi_load(...);
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char *image_data = stbi_load( file_name, &x, &y, &n, force_channels );
+    if ( !image_data ) {
+        fprintf( stderr, "ERROR: could not load %s\n", file_name );
+        return false;
+    }
+    // NPOT check
+    if ( ( x & ( x - 1 ) ) != 0 || ( y & ( y - 1 ) ) != 0 ) {
+        fprintf( stderr, "WARNING: texture %s is not power-of-2 dimensions\n",
+                file_name );
+    }
+    
+    glGenTextures( 1, tex );
+    glActiveTexture( GL_TEXTURE0 );
+    glBindTexture( GL_TEXTURE_2D, *tex );
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                 image_data );
+    glGenerateMipmap( GL_TEXTURE_2D );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+    GLfloat max_aniso = 0.0f;
+    glGetFloatv( GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_aniso );
+    // set the maximum!
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, max_aniso );
+    return true;
+}
+
+
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
@@ -98,6 +137,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
+    
+    printf("eu aqui ...");
     if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
     {
         double xpos, ypos;
@@ -135,8 +176,18 @@ bool parse_file_into_str (
     return true;
 }
 int main () {
+
     
-    auto t_start = std::chrono::high_resolution_clock::now();
+    //init
+//    int width, height;
+//    unsigned char* image =
+//    SOIL_load_image( "/Users/maiquelknechtel/Desktop/wall.jpg", &width, &height, 0, SOIL_LOAD_RGB);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+//                 GL_UNSIGNED_BYTE, image);
+//
+    
+    
+   
 t1 = t1+0.01;
     
 //    GLfloat matrix[] = {
@@ -148,7 +199,7 @@ t1 = t1+0.01;
 //
     
     const GLchar* p;
-    
+    const GLchar* v1;
     GLFWwindow* window = NULL;
     const GLubyte* renderer;
     const GLubyte* version;
@@ -167,16 +218,44 @@ t1 = t1+0.01;
 //        -0.5f, 0.5f, 0.0f, 0.0f // t1
 //    };
 //
+//    GLfloat points[] = {
+//        -0.5,   0.5, 0.0f,
+//        -0.5,  -0.5, 0.0f,
+//         0.5,  -0.5, 0.0f,
+//        -0.5,   0.5, 0.0f,
+//         0.5,  -0.5, 0.0f,
+//         0.5,   0.5, 0.0f,
+//    };
+//novo
+    
+//    GLfloat texcoords[] = {
+//        0.0f, 0.0f,
+//        1.0f, 0.0f,
+//        1.0f, 1.0f,
+//        1.0f, 1.0f,
+//        0.0f, 1.0f,
+//        0.0f, 0.0f
+//    };
+    /* OTHER STUFF GOES HERE NEXT */
     GLfloat points[] = {
-        -0.5,   0.5, 0.0f,
-        -0.5,  -0.5, 0.0f,
-         0.5,  -0.5, 0.0f,
-        -0.5,   0.5, 0.0f,
-         0.5,  -0.5, 0.0f,
-         0.5,   0.5, 0.0f,
+        -0.5f,  -0.5f, 0.0f,
+        0.5f,   -0.5f, 0.0f,
+        0.5f,    0.5f, 0.0f,
+        0.5f,    0.5f, 0.0f,
+        -0.5f,   0.5f, 0.0f,
+        -0.5f,  -0.5f, 0.0f };
+    
+    // 2^16 = 65536
+    GLfloat texcoords[] = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f,
+        0.0f, 0.0f
     };
-//
-
+  
+    
     
 //    GLfloat points[] = {
 //
@@ -237,6 +316,34 @@ t1 = t1+0.01;
     glewExperimental = GL_TRUE;
     glewInit ();
     
+    
+    
+    
+    GLuint points_vbo;
+    glGenBuffers (1, &points_vbo);
+    glBindBuffer (GL_ARRAY_BUFFER, points_vbo);
+    glBufferData (GL_ARRAY_BUFFER, 18 * sizeof (GLfloat), points, GL_STATIC_DRAW);
+    
+    GLuint texcoords_vbo;
+    glGenBuffers (1, &texcoords_vbo);
+    glBindBuffer (GL_ARRAY_BUFFER, texcoords_vbo);
+    glBufferData (GL_ARRAY_BUFFER, 12 * sizeof (GLfloat), texcoords, GL_STATIC_DRAW);
+    
+
+  
+    glGenVertexArrays (1, &vao);
+    glBindVertexArray (vao);
+    glBindBuffer (GL_ARRAY_BUFFER, points_vbo);
+    glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    glBindBuffer (GL_ARRAY_BUFFER, texcoords_vbo);
+    glVertexAttribPointer (1, 2, GL_FLOAT, GL_FALSE, 0, NULL); // normalise!
+    glEnableVertexAttribArray (0);
+    glEnableVertexAttribArray (1);
+    
+    ///novo
+    
+    
+    
     /* get version info */
     renderer = glGetString (GL_RENDERER); /* get renderer string */
     version = glGetString (GL_VERSION); /* version as a string */
@@ -247,48 +354,28 @@ t1 = t1+0.01;
     glEnable (GL_DEPTH_TEST); /* enable depth-testing */
     glDepthFunc (GL_LESS);/*depth-testing interprets a smaller value as "closer"*/
     
-    /* a vertex buffer object (VBO) is created here. this stores an array of data
-     on the graphics adapter's memory. in our case - the vertex points */
-    glGenBuffers (1, &vbo);
-    glBindBuffer (GL_ARRAY_BUFFER, vbo);
-    
-    //antesglBufferData (GL_ARRAY_BUFFER, 12 * sizeof (GLfloat), points, GL_STATIC_DRAW);
-    
-    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-    /* the vertex array object (VAO) is a little descriptor that defines which
-     data from vertex buffer objects should be used as input variables to vertex
-     shaders. in our case - use our only VBO, and say 'every three floats is a
-     variable' */
-    
-    
-    glGenVertexArrays (1, &vao);
-    glBindVertexArray (vao);
-    glEnableVertexAttribArray (0);
-    glBindBuffer (GL_ARRAY_BUFFER, vbo);
-    glVertexAttribPointer (0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-    
+  
     /* here we copy the shader strings into GL shaders, and compile them. we then
      create an executable shader 'program' and attach both of the compiled shaders.
      we link this, which matches the outputs of the vertex shader to the inputs of
      the fragment shader, etc. and it is then ready to use */
-  
+
   
 
     fs = glCreateShader (GL_FRAGMENT_SHADER);
-        assert (parse_file_into_str ("/Users/maiquelknechtel/Desktop/code/appOpengl/appOpengl/vs.glsl", vertex_shader, 1024 * 256));
+        assert (parse_file_into_str ("/Users/maiquelknechtel/Desktop/code/continue/square/appOpengl/vs.glsl", vertex_shader, 1024 * 256));
     
-    assert(parse_file_into_str("/Users/maiquelknechtel/Desktop/code/appOpengl/appOpengl/fs.glsl",fragment_shader, 1024* 256));
+    assert(parse_file_into_str("/Users/maiquelknechtel/Desktop/code/continue/square/appOpengl/fs.glsl",fragment_shader, 1024* 256));
     
 
     
     vs = glCreateShader (GL_VERTEX_SHADER);
-    p = (const GLchar*)vertex_shader;
-    glShaderSource (vs, 1, &p, NULL);
+    v1 = (const GLchar*)vertex_shader;
+    glShaderSource (vs, 1, &v1, NULL);
     glCompileShader (vs);
     
     
-    
-    
+    fs = glCreateShader (GL_FRAGMENT_SHADER);
     p = (const GLchar*)fragment_shader;
     glShaderSource (fs, 1, &p, NULL);
     glCompileShader (fs);
@@ -307,35 +394,46 @@ t1 = t1+0.01;
     glAttachShader (shader_programme, fs);
     glAttachShader (shader_programme, vs);
     
+    
+    //verificar
+  
+    //
+    
     glBindFragDataLocation(shader_programme, 0, "outColor");
     glLinkProgram (shader_programme);
     
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     
+    //texture
+    //textura
+    GLuint tex;
+    assert (load_texture ("/Users/maiquelknechtel/Desktop/code/continue/square/appOpengl/wall.jpg", &tex));
     
+    //texttura
+    
+    //novo
+    glEnable (GL_CULL_FACE); // cull face
+    glCullFace (GL_BACK); // cull back face
+    glFrontFace (GL_CCW); // GL_CCW for counter clock-wise
+    //aqui
+    
+    //
     
     while (!glfwWindowShouldClose (window)) {
         /* wipe the drawing surface clear */
         
-        
-        
-        
-        static double previous_seconds = glfwGetTime ();
-        double current_seconds = glfwGetTime ();
-        double elapsed_seconds = current_seconds - previous_seconds;
         glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-      //  int matrix_location = glGetUniformLocation (shader_programme, "matrix");
-        //glUseProgram (shader_programme);
         glUniformMatrix4fv(glGetUniformLocation(shader_programme, "matrix"), 1, GL_FALSE, glm::value_ptr(matrix));
+    
+        
+        
+        
+        
         glUseProgram (shader_programme);
-        
-        
-        
-        
-        
-        
         glBindVertexArray (vao);
+      
+        
         /* draw points 0-3 from the currently bound VAO with current in-use shader*/
         //antes
         glDrawArrays (GL_TRIANGLES, 0, 6);
@@ -349,10 +447,12 @@ t1 = t1+0.01;
         if (GLFW_PRESS == glfwGetKey (window, GLFW_KEY_ESCAPE)) {
             glfwSetWindowShouldClose (window, 1);
         }
-        
+        //textura
+
+        //
      
         
-        t1=t1+0.001;
+        t1=t1+0.00001;
        
      
       
@@ -369,10 +469,6 @@ t1 = t1+0.01;
         glUseProgram (shader_programme);
       
         
-        
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        
-        //  glUniformMatrix4fv (matrix_location, 1, GL_FALSE, matrix);
         glfwSwapBuffers (window);
     }
     
