@@ -303,7 +303,6 @@ t1 = t1+0.01;
                                600, 600, "Hello Triangle", NULL, NULL
                                );
     
-  //      glViewport( 0, 0, 800, 600 );
     
       glfwSetKeyCallback(window, key_callback);
     if (!window) {
@@ -340,9 +339,7 @@ t1 = t1+0.01;
     glEnableVertexAttribArray (0);
     glEnableVertexAttribArray (1);
     
-    ///novo
-    
-    
+ 
     
     /* get version info */
     renderer = glGetString (GL_RENDERER); /* get renderer string */
@@ -395,29 +392,19 @@ t1 = t1+0.01;
     glAttachShader (shader_programme, vs);
     
     
-    //verificar
-  
-    //
+    
     
     glBindFragDataLocation(shader_programme, 0, "outColor");
     glLinkProgram (shader_programme);
     
     glfwSetMouseButtonCallback(window, mouse_button_callback);
     
-    //texture
-    //textura
     GLuint tex;
     assert (load_texture ("/Users/maiquelknechtel/Desktop/code/continue/square/appOpengl/wall.jpg", &tex));
     
-    //texttura
-    
-    //novo
     glEnable (GL_CULL_FACE); // cull face
     glCullFace (GL_BACK); // cull back face
     glFrontFace (GL_CCW); // GL_CCW for counter clock-wise
-    //aqui
-    
-    //
     
     while (!glfwWindowShouldClose (window)) {
         /* wipe the drawing surface clear */
@@ -447,12 +434,10 @@ t1 = t1+0.01;
         if (GLFW_PRESS == glfwGetKey (window, GLFW_KEY_ESCAPE)) {
             glfwSetWindowShouldClose (window, 1);
         }
-        //textura
-
-        //
+       
      
         
-        t1=t1+0.00001;
+        t1=t1+0.001;
        
      
       
